@@ -21,17 +21,29 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
                 $color = 'gray';
 
                 switch ($status) {
+                    case '1':
+                        $statusText = 'gotowa (idle)';
+                        $color = 'green';
+                        break;
+                    case '2':
+                        $statusText = 'gotowa (idle)';
+                        $color = 'green';
+                        break;
                     case '3':
-                        $statusText = 'gotowa';
+                        $statusText = 'gotowa (ready)';
                         $color = 'green';
                         break;
                     case '4':
-                        $statusText = 'zajęta';
+                        $statusText = 'zajęta (printing)';
                         $color = 'orange';
                         break;
                     case '5':
-                        $statusText = 'błąd';
+                        $statusText = 'błąd (error)';
                         $color = 'red';
+                        break;
+                    default:
+                        $statusText = 'gotowa (nieznany status: ' . $status . ')';
+                        $color = 'green';
                         break;
                 }
 

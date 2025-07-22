@@ -298,8 +298,12 @@ class DocumentManager
                 return 'busy';
             } elseif (strpos($output, '5') !== false) {
                 return 'error';
+            } elseif (strpos($output, '1') !== false) {
+                return 'ready';
+            } elseif (strpos($output, '2') !== false) {
+                return 'ready';
             } else {
-                return 'unknown';
+                return 'ready';
             }
         } else {
             $command = "lpstat -p " . PRINTER_NAME . " 2>&1";
