@@ -292,15 +292,15 @@ class DocumentManager
             $command = "wmic printer where name=\"" . PRINTER_NAME . "\" get PrinterStatus /value 2>&1";
             $output = shell_exec($command);
 
-            if (strpos($output, '3') !== false) {
+            if (strpos($output, '=3') !== false || strpos($output, '3') !== false) {
                 return 'ready';
-            } elseif (strpos($output, '4') !== false) {
+            } elseif (strpos($output, '=4') !== false || strpos($output, '4') !== false) {
                 return 'busy';
-            } elseif (strpos($output, '5') !== false) {
+            } elseif (strpos($output, '=5') !== false || strpos($output, '5') !== false) {
                 return 'error';
-            } elseif (strpos($output, '1') !== false) {
+            } elseif (strpos($output, '=1') !== false || strpos($output, '1') !== false) {
                 return 'ready';
-            } elseif (strpos($output, '2') !== false) {
+            } elseif (strpos($output, '=2') !== false || strpos($output, '2') !== false) {
                 return 'ready';
             } else {
                 return 'ready';

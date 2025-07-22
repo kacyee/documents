@@ -17,6 +17,7 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
                 $currentPrinter = trim(substr($line, 5));
             } elseif (strpos($line, 'PrinterStatus=') === 0) {
                 $status = trim(substr($line, 13));
+                $status = str_replace('=', '', $status);
                 $statusText = 'nieznany';
                 $color = 'gray';
 
@@ -42,7 +43,7 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
                         $color = 'red';
                         break;
                     default:
-                        $statusText = 'gotowa (nieznany status: ' . $status . ')';
+                        $statusText = 'gotowa (status: ' . $status . ')';
                         $color = 'green';
                         break;
                 }
@@ -56,6 +57,9 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 
     echo "<h2>Test drukowania Windows:</h2>";
     echo "<p>Konfigurowana drukarka: " . PRINTER_NAME . "</p>";
+    echo "<p><strong>Uwaga:</strong> Jeśli drukowanie nie działa, sprawdź czy nazwa drukarki w config.php jest poprawna.</p>";
+    echo "<p>Aby sprawdzić nazwy drukarek, uruchom w cmd: <code>wmic printer get name</code></p>";
+    echo "<p>Aby sprawdzić szczegółowy status drukarki, uruchom w cmd: <code>wmic printer where name=\"" . PRINTER_NAME . "\" get PrinterStatus,WorkOffline,DetectedErrorState /value</code></p>";
     echo "<p>Możesz przetestować drukarkę komendą:</p>";
     echo "<p><code>powershell -Command \"Start-Process -FilePath 'test.txt' -Verb Print\"</code></p>";
     echo "<p>lub</p>";
@@ -77,6 +81,25 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
     echo "<input type='hidden' name='test_print' value='1'>";
     echo "<button type='submit' style='padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;'>Testuj drukowanie kodu kreskowego</button>";
     echo "</form>";
+
+    if (isset($_POST['test_print'])) {
+        echo "<h4>Wynik testu drukowania:</h4>";
+        require_once 'DocumentManager.php';
+        $manager = new DocumentManager();
+        $success = $manager->printBarcodeImageOnly('TEST123');
+        if ($success) {
+            echo "<p style='color: green;'>✓ Drukowanie testowe powiodło się</p>";
+        } else {
+            echo "<p style='color: red;'>✗ Drukowanie testowe nie powiodło się</p>";
+            echo "<p><strong>Możliwe przyczyny:</strong></p>";
+            echo "<ul>";
+            echo "<li>Drukarka jest offline - sprawdź w Panel sterowania > Urządzenia i drukarki</li>";
+            echo "<li>Niepoprawna nazwa drukarki w config.php</li>";
+            echo "<li>Brak uprawnień do drukowania</li>";
+            echo "<li>Drukarka nie obsługuje drukowania obrazów PNG</li>";
+            echo "</ul>";
+        }
+    }
 } else {
     echo "<h2>Dostępne drukarki CUPS:</h2>";
 
