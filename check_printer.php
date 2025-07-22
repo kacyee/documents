@@ -60,7 +60,11 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
     echo "<p><strong>Uwaga:</strong> Jeśli drukowanie nie działa, sprawdź czy nazwa drukarki w config.php jest poprawna.</p>";
     echo "<p>Aby sprawdzić nazwy drukarek, uruchom w cmd: <code>wmic printer get name</code></p>";
     echo "<p>Aby sprawdzić szczegółowy status drukarki, uruchom w cmd: <code>wmic printer where name=\"" . PRINTER_NAME . "\" get PrinterStatus,WorkOffline,DetectedErrorState /value</code></p>";
+    echo "<p><strong>Status drukarki:</strong> =3 oznacza gotowość, =4 oznacza drukowanie, =5 oznacza błąd</p>";
+    echo "<p><strong>Rozmiar taśmy:</strong> Upewnij się, że w sterowniku drukarki jest ustawiony rozmiar 17x54mm</p>";
     echo "<p>Możesz przetestować drukarkę komendą:</p>";
+    echo "<p><code>print test.txt</code></p>";
+    echo "<p>lub</p>";
     echo "<p><code>powershell -Command \"Start-Process -FilePath 'test.txt' -Verb Print\"</code></p>";
     echo "<p>lub</p>";
     echo "<p><code>rundll32 shimgvw.dll,ImageView_PrintTo \"" . PRINTER_NAME . "\" test.txt</code></p>";
@@ -70,11 +74,14 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
     echo "<h3>Test drukowania obrazu:</h3>";
     echo "<p>Utwórz plik testowy i przetestuj drukowanie:</p>";
     echo "<p><code>echo 'Test drukowania' > test.txt</code></p>";
+    echo "<p><code>print test.txt</code></p>";
+    echo "<p>lub</p>";
     echo "<p><code>powershell -Command \"Start-Process -FilePath 'test.txt' -Verb Print\"</code></p>";
 
     echo "<h3>Test drukowania kodu kreskowego:</h3>";
     echo "<p><a href='barcode_image.php?code=TEST123' target='_blank'>Wyświetl kod kreskowy testowy</a></p>";
     echo "<p>Kliknij prawym przyciskiem myszy na obraz i wybierz 'Drukuj'</p>";
+    echo "<p><strong>Alternatywnie:</strong> Skopiuj obraz i wklej do programu Brother P-touch Editor</p>";
 
     echo "<h3>Test drukowania przez system:</h3>";
     echo "<form method='POST' style='margin: 10px 0;'>";
@@ -89,6 +96,7 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
         $success = $manager->printBarcodeImageOnly('TEST123');
         if ($success) {
             echo "<p style='color: green;'>✓ Drukowanie testowe powiodło się</p>";
+            echo "<p><strong>Uwaga:</strong> Jeśli etykieta się wydrukowała, ale ma nieprawidłowy rozmiar, sprawdź ustawienia rozmiaru taśmy w sterowniku drukarki.</p>";
         } else {
             echo "<p style='color: red;'>✗ Drukowanie testowe nie powiodło się</p>";
             echo "<p><strong>Możliwe przyczyny:</strong></p>";
@@ -97,7 +105,10 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
             echo "<li>Niepoprawna nazwa drukarki w config.php</li>";
             echo "<li>Brak uprawnień do drukowania</li>";
             echo "<li>Drukarka nie obsługuje drukowania obrazów PNG</li>";
+            echo "<li>Drukarka wymaga specjalnego oprogramowania (np. Brother P-touch Editor)</li>";
+            echo "<li>Rozmiar taśmy nie jest ustawiony w sterowniku (ustaw 17x54mm)</li>";
             echo "</ul>";
+            echo "<p><strong>Rozwiązanie:</strong> Spróbuj wydrukować kod kreskowy ręcznie przez przeglądarkę (kliknij prawym na obraz i wybierz 'Drukuj')</p>";
         }
     }
 } else {

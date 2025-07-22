@@ -227,7 +227,15 @@ class DocumentManager
         file_put_contents($tempFile, $barcodeImage);
 
         if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-            $command = "powershell -Command \"Start-Process -FilePath '" . escapeshellarg($tempFile) . "' -Verb Print\"";
+            $command = "print \"" . $tempFile . "\"";
+            $output = shell_exec($command . " 2>&1");
+
+            if (empty($output)) {
+                unlink($tempFile);
+                return true;
+            }
+
+            $command = "powershell -Command \"Start-Process -FilePath '" . escapeshellarg($tempFile) . "' -Verb Print -WindowStyle Hidden\"";
             $output = shell_exec($command . " 2>&1");
 
             if (empty($output)) {
@@ -244,22 +252,6 @@ class DocumentManager
             }
 
             $command = "copy \"" . $tempFile . "\" \"" . PRINTER_NAME . "\"";
-            $output = shell_exec($command . " 2>&1");
-
-            if (empty($output)) {
-                unlink($tempFile);
-                return true;
-            }
-
-            $command = "rundll32 shimgvw.dll,ImageView_PrintTo \"Microsoft Print to PDF\" \"" . $tempFile . "\"";
-            $output = shell_exec($command . " 2>&1");
-
-            if (empty($output)) {
-                unlink($tempFile);
-                return true;
-            }
-
-            $command = "rundll32 shimgvw.dll,ImageView_PrintTo \"\" \"" . $tempFile . "\"";
             $output = shell_exec($command . " 2>&1");
 
             unlink($tempFile);
