@@ -278,24 +278,7 @@ class DocumentManager
         return true;
     }
 
-    public function openBarcodeForPrinting($documentId)
-    {
-        $generator = new BarcodeGeneratorPNG();
-        $barcodeImage = $generator->getBarcode($documentId, $generator::TYPE_CODE_128, 3, 100);
 
-        $tempFile = tempnam(sys_get_temp_dir(), 'barcode_') . '.png';
-        file_put_contents($tempFile, $barcodeImage);
-
-        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-            $command = "start " . escapeshellarg($tempFile);
-            shell_exec($command . " 2>&1");
-            return true;
-        } else {
-            $command = "xdg-open " . escapeshellarg($tempFile);
-            shell_exec($command . " 2>&1");
-            return true;
-        }
-    }
 
     public function printBarcodeWithBrotherLibrary($documentId)
     {

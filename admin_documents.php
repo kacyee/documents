@@ -99,7 +99,6 @@ require_once 'includes/header.php';
     <a href="search.php">Wyszukiwanie</a>
     <a href="barcode_scan.php">Skanowanie kodu</a>
     <a href="check_printer.php">Status drukarki</a>
-    <a href="test_brother_library.php">Test Brother</a>
 </div>
 
 <div class="container">
@@ -208,7 +207,6 @@ require_once 'includes/header.php';
                                     <td>
                                         <button class="edit-btn" onclick="editDocument(<?= $doc['id'] ?>, '<?= htmlspecialchars($doc['defendant_name']) ?>', '<?= htmlspecialchars($doc['plaintiff_name']) ?>', '<?= htmlspecialchars($doc['case_number']) ?>', '<?= $doc['case_type'] ?>', <?= $doc['location_id'] ?>)">Edytuj</button>
                                         <button class="print-btn" onclick="printDocument(<?= $doc['id'] ?>)">Drukuj</button>
-                                        <button class="print-btn" onclick="openForPrinting(<?= $doc['id'] ?>)" style="margin-left: 5px;">Otwórz</button>
                                         <form method="POST" style="display: inline;">
                                             <input type="hidden" name="action" value="archive">
                                             <input type="hidden" name="document_id" value="<?= $doc['id'] ?>">
@@ -246,7 +244,6 @@ require_once 'includes/header.php';
                                 <td>
                                     <button class="edit-btn" onclick="editDocument(<?= $doc['id'] ?>, '<?= htmlspecialchars($doc['defendant_name']) ?>', '<?= htmlspecialchars($doc['plaintiff_name']) ?>', '<?= htmlspecialchars($doc['case_number']) ?>', '<?= $doc['case_type'] ?>', <?= $doc['location_id'] ?>)">Edytuj</button>
                                     <button class="print-btn" onclick="printDocument(<?= $doc['id'] ?>)">Drukuj</button>
-                                    <button class="print-btn" onclick="openForPrinting(<?= $doc['id'] ?>)" style="margin-left: 5px;">Otwórz</button>
                                     <form method="POST" style="display: inline; ">
                                         <input type="hidden" name="action" value="archive">
                                         <input type="hidden" name="document_id" value="<?= $doc['id'] ?>">
@@ -284,7 +281,6 @@ require_once 'includes/header.php';
                                 <td>
                                     <button class="edit-btn" onclick="editDocument(<?= $doc['id'] ?>, '<?= htmlspecialchars($doc['defendant_name']) ?>', '<?= htmlspecialchars($doc['plaintiff_name']) ?>', '<?= htmlspecialchars($doc['case_number']) ?>', '<?= $doc['case_type'] ?>', <?= $doc['location_id'] ?>)">Edytuj</button>
                                     <button class="print-btn" onclick="printDocument(<?= $doc['id'] ?>)">Drukuj</button>
-                                    <button class="print-btn" onclick="openForPrinting(<?= $doc['id'] ?>)" style="margin-left: 5px;">Otwórz</button>
                                     <form method="POST" style="display: inline;">
                                         <input type="hidden" name="action" value="archive">
                                         <input type="hidden" name="document_id" value="<?= $doc['id'] ?>">
@@ -373,37 +369,7 @@ require_once 'includes/header.php';
                 });
         }
 
-        function openForPrinting(documentId) {
-            const button = event.target;
-            const originalText = button.textContent;
 
-            button.disabled = true;
-            button.textContent = 'Otwieranie...';
-
-            fetch('open_for_print.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: 'document_id=' + documentId
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Etykieta została otwarta. Kliknij CTRL+P aby wydrukować.');
-                    } else {
-                        alert('Błąd: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Błąd połączenia: ' + error.message);
-                })
-                .finally(() => {
-                    button.disabled = false;
-                    button.textContent = originalText;
-                });
-        }
 
         function editDocument(documentId, defendantName, plaintiffName, caseNumber, caseType, locationId) {
             document.getElementById('formAction').value = 'edit';
