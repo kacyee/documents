@@ -45,9 +45,26 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
     echo "<h2>Test drukowania Windows:</h2>";
     echo "<p>Konfigurowana drukarka: " . PRINTER_NAME . "</p>";
     echo "<p>Możesz przetestować drukarkę komendą:</p>";
-    echo "<p><code>copy test.txt \"" . PRINTER_NAME . "\"</code></p>";
-    echo "<p>lub</p>";
     echo "<p><code>powershell -Command \"Start-Process -FilePath 'test.txt' -Verb Print\"</code></p>";
+    echo "<p>lub</p>";
+    echo "<p><code>rundll32 shimgvw.dll,ImageView_PrintTo \"" . PRINTER_NAME . "\" test.txt</code></p>";
+    echo "<p>lub</p>";
+    echo "<p><code>copy test.txt \"" . PRINTER_NAME . "\"</code></p>";
+
+    echo "<h3>Test drukowania obrazu:</h3>";
+    echo "<p>Utwórz plik testowy i przetestuj drukowanie:</p>";
+    echo "<p><code>echo 'Test drukowania' > test.txt</code></p>";
+    echo "<p><code>powershell -Command \"Start-Process -FilePath 'test.txt' -Verb Print\"</code></p>";
+
+    echo "<h3>Test drukowania kodu kreskowego:</h3>";
+    echo "<p><a href='barcode_image.php?code=TEST123' target='_blank'>Wyświetl kod kreskowy testowy</a></p>";
+    echo "<p>Kliknij prawym przyciskiem myszy na obraz i wybierz 'Drukuj'</p>";
+
+    echo "<h3>Test drukowania przez system:</h3>";
+    echo "<form method='POST' style='margin: 10px 0;'>";
+    echo "<input type='hidden' name='test_print' value='1'>";
+    echo "<button type='submit' style='padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;'>Testuj drukowanie kodu kreskowego</button>";
+    echo "</form>";
 } else {
     echo "<h2>Dostępne drukarki CUPS:</h2>";
 

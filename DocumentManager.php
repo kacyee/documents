@@ -227,27 +227,40 @@ class DocumentManager
         file_put_contents($tempFile, $barcodeImage);
 
         if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-            $command = "copy " . escapeshellarg($tempFile) . " \"" . PRINTER_NAME . "\"";
+            $success = false;
+            $errorOutput = '';
+
+            $command = "powershell -Command \"Start-Process -FilePath '" . escapeshellarg($tempFile) . "' -Verb Print -WindowStyle Hidden\"";
             $output = shell_exec($command . " 2>&1");
+            $errorOutput .= "PowerShell Print: " . $output . "\n";
 
             if (empty($output) || strpos($output, 'error') === false) {
-                unlink($tempFile);
-                return true;
+                $success = true;
+            } else {
+                $command = "rundll32 shimgvw.dll,ImageView_PrintTo \"" . PRINTER_NAME . "\" \"" . $tempFile . "\"";
+                $output = shell_exec($command . " 2>&1");
+                $errorOutput .= "Rundll32: " . $output . "\n";
+
+                if (empty($output) || strpos($output, 'error') === false) {
+                    $success = true;
+                } else {
+                    $command = "copy \"" . $tempFile . "\" \"" . PRINTER_NAME . "\"";
+                    $output = shell_exec($command . " 2>&1");
+                    $errorOutput .= "Copy: " . $output . "\n";
+
+                    if (empty($output) || strpos($output, 'error') === false) {
+                        $success = true;
+                    }
+                }
             }
-
-            $command = "powershell -Command \"Start-Process -FilePath '" . escapeshellarg($tempFile) . "' -Verb Print\"";
-            $output = shell_exec($command . " 2>&1");
-
-            if (empty($output) || strpos($output, 'error') === false) {
-                unlink($tempFile);
-                return true;
-            }
-
-            $command = "mspaint /p " . escapeshellarg($tempFile);
-            $output = shell_exec($command . " 2>&1");
 
             unlink($tempFile);
-            return empty($output) || strpos($output, 'error') === false;
+
+            if (!$success) {
+                error_log("Windows printing failed: " . $errorOutput);
+            }
+
+            return $success;
         } else {
             $command = "lp -d " . PRINTER_NAME . " -o media=" . PRINTER_MEDIA_SIZE . " " . escapeshellarg($tempFile);
             $output = shell_exec($command . " 2>&1");
