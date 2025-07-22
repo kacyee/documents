@@ -89,6 +89,12 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
     echo "<button type='submit' style='padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;'>Testuj drukowanie kodu kreskowego</button>";
     echo "</form>";
 
+    echo "<h3>Test otwierania etykiety:</h3>";
+    echo "<form method='POST' style='margin: 10px 0;'>";
+    echo "<input type='hidden' name='test_open' value='1'>";
+    echo "<button type='submit' style='padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;'>Otwórz etykietę do wydruku</button>";
+    echo "</form>";
+
     if (isset($_POST['test_print'])) {
         echo "<h4>Wynik testu drukowania:</h4>";
         require_once 'DocumentManager.php';
@@ -109,6 +115,18 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
             echo "<li>Rozmiar taśmy nie jest ustawiony w sterowniku (ustaw 17x54mm)</li>";
             echo "</ul>";
             echo "<p><strong>Rozwiązanie:</strong> Spróbuj wydrukować kod kreskowy ręcznie przez przeglądarkę (kliknij prawym na obraz i wybierz 'Drukuj')</p>";
+        }
+    }
+
+    if (isset($_POST['test_open'])) {
+        echo "<h4>Wynik testu otwierania etykiety:</h4>";
+        require_once 'DocumentManager.php';
+        $manager = new DocumentManager();
+        $success = $manager->openBarcodeForPrinting('TEST123');
+        if ($success) {
+            echo "<p style='color: green;'>✓ Etykieta została otwarta. Kliknij CTRL+P aby wydrukować.</p>";
+        } else {
+            echo "<p style='color: red;'>✗ Błąd podczas otwierania etykiety</p>";
         }
     }
 } else {

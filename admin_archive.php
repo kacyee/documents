@@ -195,6 +195,74 @@ require_once 'includes/header.php';
         document.getElementById(tabName).classList.add('active');
         event.target.classList.add('active');
     }
+
+    function printDocument(documentId) {
+        const button = event.target;
+        const originalText = button.textContent;
+
+        button.disabled = true;
+        button.textContent = 'Drukowanie...';
+
+        fetch('print_document.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'document_id=' + documentId
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Kod kreskowy został wysłany do drukarki!');
+                } else {
+                    let errorMessage = 'Błąd: ' + data.message;
+                    if (data.debug) {
+                        errorMessage += '\n\nSzczegóły: ' + data.debug;
+                    }
+                    alert(errorMessage);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Błąd połączenia: ' + error.message);
+            })
+            .finally(() => {
+                button.disabled = false;
+                button.textContent = originalText;
+            });
+    }
+
+    function openForPrinting(documentId) {
+        const button = event.target;
+        const originalText = button.textContent;
+
+        button.disabled = true;
+        button.textContent = 'Otwieranie...';
+
+        fetch('open_for_print.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'document_id=' + documentId
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Etykieta została otwarta. Kliknij CTRL+P aby wydrukować.');
+                } else {
+                    alert('Błąd: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Błąd połączenia: ' + error.message);
+            })
+            .finally(() => {
+                button.disabled = false;
+                button.textContent = originalText;
+            });
+    }
 </script>
 
 <?php require_once 'includes/footer.php'; ?>

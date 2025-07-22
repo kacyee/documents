@@ -3,6 +3,9 @@ require_once 'Database.php';
 require_once 'vendor/autoload.php';
 
 use Picqer\Barcode\BarcodeGeneratorPNG;
+use Talal\LabelPrinter\Printer;
+use Talal\LabelPrinter\Mode\Escp;
+use Talal\LabelPrinter\Command;
 
 class DocumentManager
 {
@@ -220,61 +223,10 @@ class DocumentManager
 
     public function printBarcodeImageOnly($documentId)
     {
-        $generator = new BarcodeGeneratorPNG();
-        $barcodeImage = $generator->getBarcode($documentId, $generator::TYPE_CODE_128, 3, 100);
-
-        $tempFile = tempnam(sys_get_temp_dir(), 'barcode_') . '.png';
-        file_put_contents($tempFile, $barcodeImage);
-
         if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-            $command = "print \"" . $tempFile . "\"";
-            $output = shell_exec($command . " 2>&1");
-
-            if (empty($output)) {
-                unlink($tempFile);
-                return true;
-            }
-
-            $command = "powershell -Command \"Start-Process -FilePath '" . escapeshellarg($tempFile) . "' -Verb Print -WindowStyle Hidden\"";
-            $output = shell_exec($command . " 2>&1");
-
-            if (empty($output)) {
-                unlink($tempFile);
-                return true;
-            }
-
-            $command = "rundll32 shimgvw.dll,ImageView_PrintTo \"" . PRINTER_NAME . "\" \"" . $tempFile . "\"";
-            $output = shell_exec($command . " 2>&1");
-
-            if (empty($output)) {
-                unlink($tempFile);
-                return true;
-            }
-
-            $command = "copy \"" . $tempFile . "\" \"" . PRINTER_NAME . "\"";
-            $output = shell_exec($command . " 2>&1");
-
-            unlink($tempFile);
-            return empty($output);
+            return $this->printBarcodeWithBrotherLibrary($documentId);
         } else {
-            $command = "lp -d " . PRINTER_NAME . " -o media=" . PRINTER_MEDIA_SIZE . " " . escapeshellarg($tempFile);
-            $output = shell_exec($command . " 2>&1");
-
-            unlink($tempFile);
-
-            if (empty($output)) {
-                return true;
-            }
-
-            if (strpos($output, 'request id is') !== false) {
-                return true;
-            }
-
-            if (strpos($output, 'error') === false && strpos($output, 'Error') === false) {
-                return true;
-            }
-
-            return false;
+            return $this->printBarcodeWithBrotherLibrary($documentId);
         }
     }
 
@@ -324,5 +276,74 @@ class DocumentManager
             shell_exec($command);
         }
         return true;
+    }
+
+    public function openBarcodeForPrinting($documentId)
+    {
+        $generator = new BarcodeGeneratorPNG();
+        $barcodeImage = $generator->getBarcode($documentId, $generator::TYPE_CODE_128, 3, 100);
+
+        $tempFile = tempnam(sys_get_temp_dir(), 'barcode_') . '.png';
+        file_put_contents($tempFile, $barcodeImage);
+
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            $command = "start " . escapeshellarg($tempFile);
+            shell_exec($command . " 2>&1");
+            return true;
+        } else {
+            $command = "xdg-open " . escapeshellarg($tempFile);
+            shell_exec($command . " 2>&1");
+            return true;
+        }
+    }
+
+    public function printBarcodeWithBrotherLibrary($documentId)
+    {
+        try {
+            if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+                $stream = fopen('usb://' . PRINTER_NAME, 'w+b');
+                if (!$stream) {
+                    throw new Exception("Nie można otworzyć połączenia z drukarką USB na Windows");
+                }
+            } else {
+                $command = "lp -d " . PRINTER_NAME . " -o media=" . PRINTER_MEDIA_SIZE . " -";
+                $descriptors = [
+                    0 => ['pipe', 'r'],
+                    1 => ['pipe', 'w'],
+                    2 => ['pipe', 'w']
+                ];
+
+                $process = proc_open($command, $descriptors, $pipes);
+                if (!is_resource($process)) {
+                    throw new Exception("Nie można uruchomić polecenia lp");
+                }
+
+                $printer = new Printer(new Escp($pipes[0]));
+                $printer->addCommand(new Command\CharStyle(Command\CharStyle::NORMAL));
+                $printer->addCommand(new Command\Align(Command\Align::CENTER));
+                $printer->addCommand(new Command\Text($documentId));
+                $printer->addCommand(new Command\Cut(Command\Cut::FULL));
+
+                $printer->printLabel();
+                fclose($pipes[0]);
+
+                $returnValue = proc_close($process);
+                return $returnValue === 0;
+            }
+
+            $printer = new Printer(new Escp($stream));
+            $printer->addCommand(new Command\CharStyle(Command\CharStyle::NORMAL));
+            $printer->addCommand(new Command\Align(Command\Align::CENTER));
+            $printer->addCommand(new Command\Text($documentId));
+            $printer->addCommand(new Command\Cut(Command\Cut::FULL));
+
+            $printer->printLabel();
+            fclose($stream);
+
+            return true;
+        } catch (Exception $e) {
+            error_log("Błąd drukowania przez bibliotekę Brother: " . $e->getMessage());
+            return false;
+        }
     }
 }
