@@ -333,6 +333,12 @@ require_once 'includes/header.php';
         }
 
         function printDocument(documentId) {
+            const button = event.target;
+            const originalText = button.textContent;
+
+            button.disabled = true;
+            button.textContent = 'Drukowanie...';
+
             fetch('print_document.php', {
                     method: 'POST',
                     headers: {
@@ -343,14 +349,22 @@ require_once 'includes/header.php';
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert('Drukowanie rozpoczęte');
+                        alert('Kod kreskowy został wysłany do drukarki!');
                     } else {
-                        alert('Błąd drukowania: ' + data.message);
+                        let errorMessage = 'Błąd: ' + data.message;
+                        if (data.debug) {
+                            errorMessage += '\n\nSzczegóły: ' + data.debug;
+                        }
+                        alert(errorMessage);
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Błąd drukowania');
+                    alert('Błąd połączenia: ' + error.message);
+                })
+                .finally(() => {
+                    button.disabled = false;
+                    button.textContent = originalText;
                 });
         }
 

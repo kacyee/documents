@@ -29,7 +29,11 @@ function printDocument(documentId) {
         if (data.success) {
             alert('Kod kreskowy został wysłany do drukarki!');
         } else {
-            alert('Błąd: ' + data.message);
+            let errorMessage = 'Błąd: ' + data.message;
+            if (data.debug) {
+                errorMessage += '\n\nSzczegóły: ' + data.debug;
+            }
+            alert(errorMessage);
         }
     })
     .catch(error => {

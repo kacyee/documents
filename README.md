@@ -58,8 +58,20 @@ dokumenty/
 ## Konfiguracja drukarki
 
 W pliku `config.php` ustaw:
-- `PRINTER_NAME` - nazwa drukarki w CUPS
+- `PRINTER_NAME` - nazwa drukarki w systemie
 - `PRINTER_MEDIA_SIZE` - rozmiar etykiety (np. '17x54mm')
+
+### Windows
+System automatycznie wykrywa Windows i używa odpowiednich komend:
+- `copy` - kopiowanie pliku do drukarki
+- PowerShell `Start-Process` - drukowanie przez PowerShell
+- `mspaint /p` - drukowanie przez Paint jako fallback
+
+### Linux
+System używa CUPS:
+- `lp` - drukowanie plików
+- `lpstat` - sprawdzanie statusu drukarki
+- `lprm` - czyszczenie kolejki drukarki
 
 ## Użycie
 
@@ -75,4 +87,5 @@ W pliku `config.php` ustaw:
 - MySQL
 - HTML5/CSS3/JavaScript
 - Composer (Picqer/php-barcode-generator)
-- CUPS (drukowanie) 
+- CUPS (drukowanie Linux)
+- Windows Print Spooler (drukowanie Windows) 

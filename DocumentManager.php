@@ -227,20 +227,33 @@ class DocumentManager
         file_put_contents($tempFile, $barcodeImage);
 
         if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-            $command = "rundll32 printui.dll,PrintUIEntry /k /n \"" . PRINTER_NAME . "\" " . escapeshellarg($tempFile);
+            $command = "copy " . escapeshellarg($tempFile) . " \"" . PRINTER_NAME . "\"";
             $output = shell_exec($command . " 2>&1");
+
+            if (empty($output) || strpos($output, 'error') === false) {
+                unlink($tempFile);
+                return true;
+            }
+
+            $command = "powershell -Command \"Start-Process -FilePath '" . escapeshellarg($tempFile) . "' -Verb Print\"";
+            $output = shell_exec($command . " 2>&1");
+
+            if (empty($output) || strpos($output, 'error') === false) {
+                unlink($tempFile);
+                return true;
+            }
+
+            $command = "mspaint /p " . escapeshellarg($tempFile);
+            $output = shell_exec($command . " 2>&1");
+
+            unlink($tempFile);
+            return empty($output) || strpos($output, 'error') === false;
         } else {
             $command = "lp -d " . PRINTER_NAME . " -o media=" . PRINTER_MEDIA_SIZE . " " . escapeshellarg($tempFile);
             $output = shell_exec($command . " 2>&1");
-        }
 
-        unlink($tempFile);
+            unlink($tempFile);
 
-        error_log("Print Output: " . $output);
-
-        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-            return empty($output) || strpos($output, 'error') === false;
-        } else {
             if (empty($output)) {
                 return true;
             }
@@ -267,8 +280,10 @@ class DocumentManager
                 return 'ready';
             } elseif (strpos($output, '4') !== false) {
                 return 'busy';
-            } else {
+            } elseif (strpos($output, '5') !== false) {
                 return 'error';
+            } else {
+                return 'unknown';
             }
         } else {
             $command = "lpstat -p " . PRINTER_NAME . " 2>&1";
@@ -287,7 +302,10 @@ class DocumentManager
     public function clearPrinterQueue()
     {
         if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-            $command = "net stop spooler && net start spooler 2>&1";
+            $command = "net stop spooler 2>&1";
+            shell_exec($command);
+            sleep(2);
+            $command = "net start spooler 2>&1";
             shell_exec($command);
         } else {
             $command = "lprm -P " . PRINTER_NAME . " - 2>&1";
