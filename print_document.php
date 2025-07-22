@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $response['message'] = 'Kod kreskowy został wysłany do drukarki';
                 } else {
                     $response['message'] = 'Błąd podczas drukowania - sprawdź status drukarki';
-                    $response['debug'] = 'Drukowanie nie powiodło się. Sprawdź logi PHP dla szczegółów.';
+                    $response['debug'] = 'Drukowanie nie powiodło się. Sprawdź czy drukarka jest podłączona i czy nazwa drukarki w config.php jest poprawna.';
                 }
             }
         } catch (Exception $e) {

@@ -227,40 +227,43 @@ class DocumentManager
         file_put_contents($tempFile, $barcodeImage);
 
         if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-            $success = false;
-            $errorOutput = '';
-
-            $command = "powershell -Command \"Start-Process -FilePath '" . escapeshellarg($tempFile) . "' -Verb Print -WindowStyle Hidden\"";
+            $command = "powershell -Command \"Start-Process -FilePath '" . escapeshellarg($tempFile) . "' -Verb Print\"";
             $output = shell_exec($command . " 2>&1");
-            $errorOutput .= "PowerShell Print: " . $output . "\n";
 
-            if (empty($output) || strpos($output, 'error') === false) {
-                $success = true;
-            } else {
-                $command = "rundll32 shimgvw.dll,ImageView_PrintTo \"" . PRINTER_NAME . "\" \"" . $tempFile . "\"";
-                $output = shell_exec($command . " 2>&1");
-                $errorOutput .= "Rundll32: " . $output . "\n";
-
-                if (empty($output) || strpos($output, 'error') === false) {
-                    $success = true;
-                } else {
-                    $command = "copy \"" . $tempFile . "\" \"" . PRINTER_NAME . "\"";
-                    $output = shell_exec($command . " 2>&1");
-                    $errorOutput .= "Copy: " . $output . "\n";
-
-                    if (empty($output) || strpos($output, 'error') === false) {
-                        $success = true;
-                    }
-                }
+            if (empty($output)) {
+                unlink($tempFile);
+                return true;
             }
+
+            $command = "rundll32 shimgvw.dll,ImageView_PrintTo \"" . PRINTER_NAME . "\" \"" . $tempFile . "\"";
+            $output = shell_exec($command . " 2>&1");
+
+            if (empty($output)) {
+                unlink($tempFile);
+                return true;
+            }
+
+            $command = "copy \"" . $tempFile . "\" \"" . PRINTER_NAME . "\"";
+            $output = shell_exec($command . " 2>&1");
+
+            if (empty($output)) {
+                unlink($tempFile);
+                return true;
+            }
+
+            $command = "rundll32 shimgvw.dll,ImageView_PrintTo \"Microsoft Print to PDF\" \"" . $tempFile . "\"";
+            $output = shell_exec($command . " 2>&1");
+
+            if (empty($output)) {
+                unlink($tempFile);
+                return true;
+            }
+
+            $command = "rundll32 shimgvw.dll,ImageView_PrintTo \"\" \"" . $tempFile . "\"";
+            $output = shell_exec($command . " 2>&1");
 
             unlink($tempFile);
-
-            if (!$success) {
-                error_log("Windows printing failed: " . $errorOutput);
-            }
-
-            return $success;
+            return empty($output);
         } else {
             $command = "lp -d " . PRINTER_NAME . " -o media=" . PRINTER_MEDIA_SIZE . " " . escapeshellarg($tempFile);
             $output = shell_exec($command . " 2>&1");

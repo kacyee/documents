@@ -10,3 +10,5 @@ define('PRINTER_MEDIA_SIZE', '17x54mm');
 define('PRINTER_DEVICE', '/dev/usb/lp0');
 define('PRINTER_IP', '192.168.1.100');
 define('PRINTER_PORT', 9100);
+
+// Aby sprawdzić nazwy drukarek na Windows, uruchom w cmd: wmic printer get name
