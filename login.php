@@ -45,7 +45,7 @@ include 'includes/header.php';
         </div>
 
         <button type="submit">Zaloguj się</button>
-        <?= password_hash('Kancelaria6', PASSWORD_BCRYPT);?>
+        
     </form>
 
 </div>
