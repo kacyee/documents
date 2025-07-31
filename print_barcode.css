@@ -1,0 +1,67 @@
+/* Ustawienia drukowania dla kodów kreskowych */
+@page {
+    size: 54mm 17mm landscape;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    width: 100%;
+}
+
+img {
+    max-width: 85%;
+    max-height: 85%;
+    display: block;
+    margin: 0;
+    padding: 0;
+}
+
+/* Ukryj wszystkie elementy oprócz obrazu podczas drukowania */
+@media print {
+    * {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    body {
+        width: 54mm !important;
+        height: 17mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        page-break-after: avoid !important;
+        page-break-before: avoid !important;
+    }
+    
+    img {
+        max-width: 85% !important;
+        max-height: 85% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        page-break-inside: avoid !important;
+    }
+    
+    /* Dodatkowe ustawienia dla różnych przeglądarek */
+    @-moz-document url-prefix() {
+        body {
+            transform: scale(1) !important;
+        }
+    }
+    
+    /* Chrome/Safari */
+    @media screen and (-webkit-min-device-pixel-ratio: 0) {
+        body {
+            -webkit-print-color-adjust: exact !important;
+        }
+    }
+} 

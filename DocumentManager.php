@@ -223,43 +223,67 @@ class DocumentManager
 
     public function printBarcodeImageOnly($documentId)
     {
-        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-            return $this->printBarcodeWithBrotherLibrary($documentId);
-        } else {
-            return $this->printBarcodeWithBrotherLibrary($documentId);
+        try {
+            $document = $this->getDocumentById($documentId);
+            
+            if (!$document) {
+                throw new Exception('Dokument nie istnieje');
+            }
+            
+            $barcodeData = $document['barcode'] ?? $documentId;
+            
+            return $this->printLabelViaNotepad($documentId, $barcodeData);
+            
+        } catch (Exception $e) {
+            error_log('Błąd drukowania: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    private function printLabelViaNotepad($documentId, $barcodeData)
+    {
+        try {
+            $testFile = __DIR__ . '/temp_label.txt';
+            
+            $content = '';
+            $content .= "ID: " . $documentId . "\r\n";
+            $content .= $barcodeData . "\r\n";
+            $content .= date('Y-m-d H:i:s') . "\r\n";
+            $content .= "\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n"; // Extra spacing for 17x54mm label
+            
+            file_put_contents($testFile, $content);
+            
+            $command = 'notepad "' . $testFile . '"';
+            shell_exec($command . ' 2>&1');
+            
+            return true;
+            
+        } catch (Exception $e) {
+            error_log('Błąd drukowania przez notatnik: ' . $e->getMessage());
+            return false;
         }
     }
 
     public function checkPrinterStatus()
     {
-        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-            $command = "wmic printer where name=\"" . PRINTER_NAME . "\" get PrinterStatus /value 2>&1";
+        try {
+            $command = 'wmic printer where name="' . PRINTER_NAME . '" get PrinterStatus /value 2>&1';
             $output = shell_exec($command);
-
-            if (strpos($output, '=3') !== false || strpos($output, '3') !== false) {
+            
+            if (strpos($output, '=3') !== false) {
                 return 'ready';
-            } elseif (strpos($output, '=4') !== false || strpos($output, '4') !== false) {
+            } elseif (strpos($output, '=4') !== false) {
                 return 'busy';
-            } elseif (strpos($output, '=5') !== false || strpos($output, '5') !== false) {
+            } elseif (strpos($output, '=5') !== false) {
                 return 'error';
-            } elseif (strpos($output, '=1') !== false || strpos($output, '1') !== false) {
-                return 'ready';
-            } elseif (strpos($output, '=2') !== false || strpos($output, '2') !== false) {
+            } elseif (strpos($output, '=1') !== false || strpos($output, '=2') !== false) {
                 return 'ready';
             } else {
-                return 'ready';
+                return 'unknown';
             }
-        } else {
-            $command = "lpstat -p " . PRINTER_NAME . " 2>&1";
-            $output = shell_exec($command);
-
-            if (strpos($output, 'idle') !== false) {
-                return 'ready';
-            } elseif (strpos($output, 'processing') !== false) {
-                return 'busy';
-            } else {
-                return 'error';
-            }
+        } catch (Exception $e) {
+            error_log('Błąd sprawdzania statusu drukarki: ' . $e->getMessage());
+            return 'error';
         }
     }
 

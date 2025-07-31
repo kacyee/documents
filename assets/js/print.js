@@ -1,16 +1,4 @@
-function showTab(tabName) {
-    document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.remove('active');
-    });
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.classList.remove('active');
-    });
-
-    document.getElementById(tabName).classList.add('active');
-    event.target.classList.add('active');
-}
-
-function printDocument(documentId) {
+function printLabel(documentId) {
     const button = event.target;
     const originalText = button.textContent;
     
@@ -23,6 +11,7 @@ function printDocument(documentId) {
     const newWindow = window.open(barcodeUrl, '_blank');
     
     if (newWindow) {
+        // Poczekaj na załadowanie obrazu, a następnie wywołaj Ctrl+P
         newWindow.onload = function() {
             setTimeout(() => {
                 try {
@@ -43,28 +32,6 @@ function printDocument(documentId) {
 }
 
 
-
-function updateLocationOptions() {
-    const caseType = document.getElementById('case_type').value;
-    const locationSelect = document.getElementById('location_id');
-    locationSelect.innerHTML = '<option value="">Wybierz miejsce</option>';
-
-    if (caseType === 'civil') {
-        civilLocations.forEach(location => {
-            const option = document.createElement('option');
-            option.value = location.id;
-            option.textContent = location.location_code;
-            locationSelect.appendChild(option);
-        });
-    } else if (caseType === 'criminal') {
-        criminalLocations.forEach(location => {
-            const option = document.createElement('option');
-            option.value = location.id;
-            option.textContent = location.location_code;
-            locationSelect.appendChild(option);
-        });
-    }
-}
 
 function showMessage(message, type) {
     const messageDiv = document.createElement('div');

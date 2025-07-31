@@ -24,6 +24,10 @@ include 'includes/header.php';
 
 <div class="header">
     <h1>Wyszukiwanie dokumentów</h1>
+    <div class="user-info">
+        Zalogowany jako: <?= htmlspecialchars($_SESSION['username']) ?>
+        <a href="logout.php" class="logout">Wyloguj</a>
+    </div>
 </div>
 
 <div class="nav">
@@ -86,12 +90,12 @@ include 'includes/header.php';
                     <tbody>
                         <?php foreach ($searchResults as $doc): ?>
                             <tr>
-                                <td><strong><?= htmlspecialchars($doc['location_code']) ?></strong></td>
+                                <td  class="type <?= $doc['case_type'] === 'civil' ? 'occupied' : 'available' ?>"><strong><?= htmlspecialchars($doc['location_code']) ?></strong></td>
 
                                 <td><?= htmlspecialchars($doc['defendant_name']) ?></td>
                                 <td><?= htmlspecialchars($doc['plaintiff_name']) ?></td>
                                 <td style="width:10%"><?= htmlspecialchars($doc['case_number']) ?></td>
-                                <td style="width:10%">
+                                <td style="width:10%"  class="type <?= $doc['case_type'] === 'civil' ? 'occupied' : 'available' ?>">
                                     <span class="case-type <?= $doc['case_type'] ?>">
                                         <?= $doc['case_type'] == 'civil' ? 'Cywilne' : 'Karne' ?>
                                     </span>

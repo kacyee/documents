@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         } else {
             try {
                 $barcode = $manager->addDocument($locationId, $defendantName, $plaintiffName, $caseNumber, $caseType);
-                header('Location: admin_documents.php?message=' . urlencode('Dokument został dodany pomyślnie. Kod kreskowy: ' . $barcode));
+                header('Location: admin_documents.php?message=' . urlencode('Dokument został dodany pomyślnie.'));
                 exit();
             } catch (Exception $e) {
                 $error = 'Błąd podczas dodawania dokumentu: ' . $e->getMessage();
@@ -98,8 +98,6 @@ require_once 'includes/header.php';
     <a href="admin_archive.php">Archiwum</a>
     <a href="search.php">Wyszukiwanie</a>
     <a href="barcode_scan.php">Skanowanie kodu</a>
-    <a href="check_printer.php">Status drukarki</a>
-    <a href="test_brother_library.php">Test Brother</a>
 </div>
 
 <div class="container">
@@ -154,7 +152,7 @@ require_once 'includes/header.php';
                     <input type="text" id="case_number" name="case_number">
                 </div>
 
-                <button type="submit" id="submitBtn">Dodaj dokument i wydrukuj kod</button>
+                <button type="submit" id="submitBtn">Dodaj dokument</button>
                 <button type="button" id="cancelBtn" onclick="cancelEdit()" style="display: none;">Anuluj edycję</button>
             </form>
         </div>
@@ -196,8 +194,8 @@ require_once 'includes/header.php';
                         <tbody>
                             <?php foreach ($allDocuments as $doc): ?>
                                 <tr>
-                                    <td><?= htmlspecialchars($doc['location_code']) ?></td>
-                                    <td>
+                                    <td  class="type <?= $doc['case_type'] === 'civil' ? 'occupied' : 'available' ?>"><?= htmlspecialchars($doc['location_code']) ?></td>
+                                    <td  class="type <?= $doc['case_type'] === 'civil' ? 'occupied' : 'available' ?>">
                                         <span class="case-type <?= $doc['case_type'] ?>">
                                             <?= $doc['case_type'] == 'civil' ? 'Cywilne' : 'Karne' ?>
                                         </span>
@@ -208,7 +206,6 @@ require_once 'includes/header.php';
                                     <td>
                                         <button class="edit-btn" onclick="editDocument(<?= $doc['id'] ?>, '<?= htmlspecialchars($doc['defendant_name']) ?>', '<?= htmlspecialchars($doc['plaintiff_name']) ?>', '<?= htmlspecialchars($doc['case_number']) ?>', '<?= $doc['case_type'] ?>', <?= $doc['location_id'] ?>)">Edytuj</button>
                                         <button class="print-btn" onclick="printDocument(<?= $doc['id'] ?>)">Drukuj</button>
-                                        <button class="print-btn" onclick="openForPrinting(<?= $doc['id'] ?>)" style="margin-left: 5px;">Otwórz</button>
                                         <form method="POST" style="display: inline;">
                                             <input type="hidden" name="action" value="archive">
                                             <input type="hidden" name="document_id" value="<?= $doc['id'] ?>">
@@ -246,7 +243,6 @@ require_once 'includes/header.php';
                                 <td>
                                     <button class="edit-btn" onclick="editDocument(<?= $doc['id'] ?>, '<?= htmlspecialchars($doc['defendant_name']) ?>', '<?= htmlspecialchars($doc['plaintiff_name']) ?>', '<?= htmlspecialchars($doc['case_number']) ?>', '<?= $doc['case_type'] ?>', <?= $doc['location_id'] ?>)">Edytuj</button>
                                     <button class="print-btn" onclick="printDocument(<?= $doc['id'] ?>)">Drukuj</button>
-                                    <button class="print-btn" onclick="openForPrinting(<?= $doc['id'] ?>)" style="margin-left: 5px;">Otwórz</button>
                                     <form method="POST" style="display: inline; ">
                                         <input type="hidden" name="action" value="archive">
                                         <input type="hidden" name="document_id" value="<?= $doc['id'] ?>">
@@ -284,7 +280,6 @@ require_once 'includes/header.php';
                                 <td>
                                     <button class="edit-btn" onclick="editDocument(<?= $doc['id'] ?>, '<?= htmlspecialchars($doc['defendant_name']) ?>', '<?= htmlspecialchars($doc['plaintiff_name']) ?>', '<?= htmlspecialchars($doc['case_number']) ?>', '<?= $doc['case_type'] ?>', <?= $doc['location_id'] ?>)">Edytuj</button>
                                     <button class="print-btn" onclick="printDocument(<?= $doc['id'] ?>)">Drukuj</button>
-                                    <button class="print-btn" onclick="openForPrinting(<?= $doc['id'] ?>)" style="margin-left: 5px;">Otwórz</button>
                                     <form method="POST" style="display: inline;">
                                         <input type="hidden" name="action" value="archive">
                                         <input type="hidden" name="document_id" value="<?= $doc['id'] ?>">
@@ -342,68 +337,35 @@ require_once 'includes/header.php';
             const originalText = button.textContent;
 
             button.disabled = true;
-            button.textContent = 'Drukowanie...';
-
-            fetch('print_document.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: 'document_id=' + documentId
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Kod kreskowy został wysłany do drukarki!');
-                    } else {
-                        let errorMessage = 'Błąd: ' + data.message;
-                        if (data.debug) {
-                            errorMessage += '\n\nSzczegóły: ' + data.debug;
-                        }
-                        alert(errorMessage);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Błąd połączenia: ' + error.message);
-                })
-                .finally(() => {
-                    button.disabled = false;
-                    button.textContent = originalText;
-                });
-        }
-
-        function openForPrinting(documentId) {
-            const button = event.target;
-            const originalText = button.textContent;
-
-            button.disabled = true;
             button.textContent = 'Otwieranie...';
 
-            fetch('open_for_print.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: 'document_id=' + documentId
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Etykieta została otwarta. Kliknij CTRL+P aby wydrukować.');
-                    } else {
-                        alert('Błąd: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Błąd połączenia: ' + error.message);
-                })
-                .finally(() => {
-                    button.disabled = false;
-                    button.textContent = originalText;
-                });
+            const barcodeUrl = 'barcode_image.php?id=' + documentId;
+            
+            // Otwórz kod kreskowy w nowej karcie
+            const newWindow = window.open(barcodeUrl, '_blank');
+            
+            if (newWindow) {
+                // Poczekaj na załadowanie obrazu, a następnie wywołaj Ctrl+P
+                newWindow.onload = function() {
+                    setTimeout(() => {
+                        try {
+                            newWindow.print();
+                        } catch (e) {
+                            console.log('Automatyczne drukowanie nie działa, użytkownik musi nacisnąć Ctrl+P');
+                        }
+                    }, 500);
+                };
+                
+                alert('Kod kreskowy został otwarty. Naciśnij Ctrl+P aby wydrukować.');
+            } else {
+                alert('Nie można otworzyć kodu kreskowego. Sprawdź blokadę wyskakujących okien.');
+            }
+            
+            button.disabled = false;
+            button.textContent = originalText;
         }
+
+
 
         function editDocument(documentId, defendantName, plaintiffName, caseNumber, caseType, locationId) {
             document.getElementById('formAction').value = 'edit';
@@ -438,7 +400,7 @@ require_once 'includes/header.php';
             document.getElementById('plaintiff_name').value = '';
             document.getElementById('case_number').value = '';
 
-            document.getElementById('submitBtn').textContent = 'Dodaj dokument i wydrukuj kod';
+            document.getElementById('submitBtn').textContent = 'Dodaj dokument';
             document.getElementById('cancelBtn').style.display = 'none';
 
             document.querySelector('.add-document-card h2').textContent = 'Dodaj nowy dokument';

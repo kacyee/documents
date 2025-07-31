@@ -84,11 +84,11 @@ require_once 'includes/header.php';
                     <tbody>
                         <?php foreach ($allDocuments as $doc): ?>
                             <tr>
-                                <td><?= htmlspecialchars($doc['location_code']) ?></td>
+                                <td  class="type <?= $doc['case_type'] === 'civil' ? 'occupied' : 'available' ?>"><?= htmlspecialchars($doc['location_code']) ?></td>
                                 <td><?= htmlspecialchars($doc['defendant_name']) ?></td>
                                 <td><?= htmlspecialchars($doc['plaintiff_name']) ?></td>
                                 <td><?= htmlspecialchars($doc['case_number']) ?></td>
-                                <td style="width:10%">
+                                <td style="width:10%"  class="type <?= $doc['case_type'] === 'civil' ? 'occupied' : 'available' ?>">
                                     <span class="case-type <?= $doc['case_type'] ?>">
                                         <?= $doc['case_type'] == 'civil' ? 'Cywilne' : 'Karne' ?>
                                     </span>
@@ -125,12 +125,12 @@ require_once 'includes/header.php';
                     <tbody>
                         <?php foreach ($civilDocuments as $doc): ?>
                             <tr>
-                                <td><?= htmlspecialchars($doc['location_code']) ?></td>
+                                <td  class="type <?= $doc['case_type'] === 'civil' ? 'occupied' : 'available' ?>"><?= htmlspecialchars($doc['location_code']) ?></td>
 
                                 <td><?= htmlspecialchars($doc['defendant_name']) ?></td>
                                 <td><?= htmlspecialchars($doc['plaintiff_name']) ?></td>
                                 <td><?= htmlspecialchars($doc['case_number']) ?></td>
-                                <td style="width:10%">
+                                <td style="width:10%"  class="type <?= $doc['case_type'] === 'civil' ? 'occupied' : 'available' ?>">
                                     <span class="case-type civil">Cywilne</span>
                                 </td>
                                 <td><?= date('d.m.Y H:i', strtotime($doc['created_at'])) ?></td>
@@ -165,11 +165,11 @@ require_once 'includes/header.php';
                     <tbody>
                         <?php foreach ($criminalDocuments as $doc): ?>
                             <tr>
-                                <td><?= htmlspecialchars($doc['location_code']) ?></td>
+                                <td  class="type <?= $doc['case_type'] === 'civil' ? 'occupied' : 'available' ?>"><?= htmlspecialchars($doc['location_code']) ?></td>
                                 <td><?= htmlspecialchars($doc['defendant_name']) ?></td>
                                 <td><?= htmlspecialchars($doc['plaintiff_name']) ?></td>
                                 <td><?= htmlspecialchars($doc['case_number']) ?></td>
-                                <td style="width:10%">
+                                <td style="width:10%"  class="type <?= $doc['case_type'] === 'civil' ? 'occupied' : 'available' ?>">
                                     <span class="case-type criminal">Karne</span>
                                 </td>
                                 <td><?= date('d.m.Y H:i', strtotime($doc['created_at'])) ?></td>
@@ -201,68 +201,35 @@ require_once 'includes/header.php';
         const originalText = button.textContent;
 
         button.disabled = true;
-        button.textContent = 'Drukowanie...';
-
-        fetch('print_document.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: 'document_id=' + documentId
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Kod kreskowy został wysłany do drukarki!');
-                } else {
-                    let errorMessage = 'Błąd: ' + data.message;
-                    if (data.debug) {
-                        errorMessage += '\n\nSzczegóły: ' + data.debug;
-                    }
-                    alert(errorMessage);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Błąd połączenia: ' + error.message);
-            })
-            .finally(() => {
-                button.disabled = false;
-                button.textContent = originalText;
-            });
-    }
-
-    function openForPrinting(documentId) {
-        const button = event.target;
-        const originalText = button.textContent;
-
-        button.disabled = true;
         button.textContent = 'Otwieranie...';
 
-        fetch('open_for_print.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: 'document_id=' + documentId
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Etykieta została otwarta. Kliknij CTRL+P aby wydrukować.');
-                } else {
-                    alert('Błąd: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Błąd połączenia: ' + error.message);
-            })
-            .finally(() => {
-                button.disabled = false;
-                button.textContent = originalText;
-            });
+        const barcodeUrl = 'barcode_image.php?id=' + documentId;
+        
+        // Otwórz kod kreskowy w nowej karcie
+        const newWindow = window.open(barcodeUrl, '_blank');
+        
+        if (newWindow) {
+            // Poczekaj na załadowanie obrazu, a następnie wywołaj Ctrl+P
+            newWindow.onload = function() {
+                setTimeout(() => {
+                    try {
+                        newWindow.print();
+                    } catch (e) {
+                        console.log('Automatyczne drukowanie nie działa, użytkownik musi nacisnąć Ctrl+P');
+                    }
+                }, 500);
+            };
+            
+            alert('Kod kreskowy został otwarty. Naciśnij Ctrl+P aby wydrukować.');
+        } else {
+            alert('Nie można otworzyć kodu kreskowego. Sprawdź blokadę wyskakujących okien.');
+        }
+        
+        button.disabled = false;
+        button.textContent = originalText;
     }
+
+
 </script>
 
 <?php require_once 'includes/footer.php'; ?>

@@ -34,44 +34,65 @@ dokumenty/
 │   ├── css/
 │   │   └── style.css
 │   └── js/
-│       └── common.js
+│       ├── common.js
+│       └── print.js
 ├── includes/
 │   ├── header.php
 │   └── footer.php
+├── templates/
+│   └── label_template.lbx
 ├── vendor/
 ├── admin_documents.php
 ├── admin_locations.php
 ├── admin_archive.php
 ├── barcode_image.php
 ├── barcode_scan.php
+├── BrotherPrinter.php
 ├── config.php
+├── create_template.php
 ├── Database.php
 ├── DocumentManager.php
 ├── index.php
+├── list_printers.php
 ├── login.php
 ├── logout.php
-├── print_document.php
+
 ├── search.php
+├── test_printer.php
+├── test_printing.html
+├── PRINTING_SETUP.md
 └── composer.json
 ```
 
-## Konfiguracja drukarki
+## Konfiguracja drukarki Brother QL-820NWB
 
+### Wymagania
+- Drukarka Brother QL-820NWB podłączona przez USB
+- Etykiety 17x54mm załadowane w drukarce
+- Sterowniki Brother zainstalowane w systemie Windows
+
+### Konfiguracja drukarki
+1. **Zainstaluj sterowniki** Brother QL-820NWB ze strony producenta
+2. **Podłącz drukarkę** przez USB
+3. **Załóż etykiety** 17x54mm w drukarce
+4. **Skonfiguruj drukarkę** w systemie Windows:
+   - Otwórz Panel sterowania → Urządzenia i drukarki
+   - Kliknij prawym na drukarkę Brother QL-820NWB
+   - Wybierz "Właściwości drukarki"
+   - W zakładce "Dokument domyślny" ustaw rozmiar na 17x54mm
+
+### Konfiguracja aplikacji
 W pliku `config.php` ustaw:
-- `PRINTER_NAME` - nazwa drukarki w systemie
-- `PRINTER_MEDIA_SIZE` - rozmiar etykiety (np. '17x54mm')
+- `PRINTER_NAME` - nazwa drukarki w systemie (domyślnie "Brother QL-820NWB")
+- `PRINTER_MEDIA_SIZE` - rozmiar etykiety (domyślnie "17x54mm")
 
-### Windows
-System automatycznie wykrywa Windows i używa odpowiednich komend:
-- `copy` - kopiowanie pliku do drukarki
-- PowerShell `Start-Process` - drukowanie przez PowerShell
-- `mspaint /p` - drukowanie przez Paint jako fallback
-
-### Linux
-System używa CUPS:
-- `lp` - drukowanie plików
-- `lpstat` - sprawdzanie statusu drukarki
-- `lprm` - czyszczenie kolejki drukarki
+### Użycie
+1. **Kliknij "Drukuj"** w tabeli dokumentów
+2. **Etykieta otworzy się** w notatniku
+3. **Naciśnij Ctrl+P** aby wydrukować
+4. **Wybierz drukarkę** Brother QL-820NWB
+5. **Ustaw rozmiar** na 17x54mm jeśli potrzebne
+6. **Wydrukuj** etykietę
 
 ## Użycie
 
@@ -87,5 +108,5 @@ System używa CUPS:
 - MySQL
 - HTML5/CSS3/JavaScript
 - Composer (Picqer/php-barcode-generator)
-- CUPS (drukowanie Linux)
-- Windows Print Spooler (drukowanie Windows) 
+- Windows Notepad (drukowanie etykiet)
+- Windows Print Spooler (komunikacja z drukarką) 

@@ -28,6 +28,10 @@ include 'includes/header.php';
 
 <div class="header">
     <h1>Skanowanie kodu kreskowego</h1>
+    <div class="user-info">
+        Zalogowany jako: <?= htmlspecialchars($_SESSION['username']) ?>
+        <a href="logout.php" class="logout">Wyloguj</a>
+    </div>
 </div>
 
 <div class="nav">

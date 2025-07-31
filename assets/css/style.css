@@ -9,6 +9,9 @@ body {
     background-color: #333;
     color: white;
     padding: 15px 20px;
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
 }
 
 .header h1 {
@@ -318,11 +321,13 @@ th {
 .status.occupied {
     background-color: #28a745;
     color: white;
+    font-size: 18px;
 }
 
 .status.available {
     background-color: #dc3545;
     color: white;
+    font-size:18px;
 }
 
 .login-container {
@@ -588,4 +593,12 @@ table td:last-child {
 } 
 .modal-info-row.place {
     font-size:20px;
+}
+.type.occupied {
+color: #28a745;
+font-weight:bold;
+}
+.type.available{
+    color: #dc3545;
+    font-weight:bold;
 }

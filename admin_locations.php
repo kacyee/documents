@@ -116,11 +116,11 @@ require_once 'includes/header.php';
                 </thead>
                 <tbody>
                     <?php foreach ($locations as $location): ?>
-                        <tr>
-                            <td><?= htmlspecialchars($location['location_code']) ?></td>
+                        <tr >
+                            <td ><?= htmlspecialchars($location['location_code']) ?></td>
                             <td><?= $location['shelf_type'] == 'civil' ? 'Sprawy cywilne' : 'Sprawy karne' ?></td>
                             <td>
-                                <span class="status <?= $location['active_documents_count'] > 0 ? 'occupied' : 'available' ?>">
+                                <span class="status <?= $location['shelf_type'] === 'civil' ? 'occupied' : 'available' ?>">
                                     <?= $location['active_documents_count'] ?>
                                 </span>
                             </td>

@@ -45,13 +45,9 @@ include 'includes/header.php';
         </div>
 
         <button type="submit">Zaloguj się</button>
+        <?= password_hash('Kancelaria6', PASSWORD_BCRYPT);?>
     </form>
 
-    <div class="info">
-        <p>Dane logowania:</p>
-        <p>Administrator: admin / password</p>
-        <p>Użytkownik: user / password</p>
-    </div>
 </div>
 
 <?php include 'includes/footer.php'; ?>
